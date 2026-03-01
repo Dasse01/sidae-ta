@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시대학원 조교 급여관리 프로그램</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a2744;
+            --primary-light: #2c5282;
+            --accent: #4299e1;
+            --accent-dark: #2b6cb0;
+            --success: #38a169;
+            --danger: #e53e3e;
+            --warning: #d69e2e;
+            --bg: #f0f4f8;
+            --card: #ffffff;
+            --text: #1a202c;
+            --text-sub: #718096;
+            --border: #e2e8f0;
+            --shadow: 0 4px 20px rgba(26,39,68,0.08);
+            --shadow-lg: 0 8px 30px rgba(26,39,68,0.12);
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg); color: var(--text);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: #fff; padding: 1.2rem 2rem;
+            box-shadow: var(--shadow-lg); position: sticky; top:0; z-index:100;
+        }
+        .header-content {
+            max-width:1200px; margin:0 auto;
+            display:flex; justify-content:space-between; align-items:center;
+            flex-wrap:wrap; gap:1rem;
+        }
+        .header h1 {
+            font-family:'IBM Plex Sans KR',sans-serif;
+            font-size:1.4rem; font-weight:600;
+        }
+        .header-controls { display:flex; gap:0.75rem; align-items:center; flex-wrap:wrap; }
+
+        .month-sel {
+            display:flex; align-items:center; gap:0.5rem;
+            background:rgba(255,255,255,0.15); padding:0.4rem 0.8rem; border-radius:8px;
+        }
+        .month-sel input {
+            background:transparent; border:none; color:#fff;
+            font-size:0.95rem; font-family:inherit;
+        }
+        .month-sel input::-webkit-calendar-picker-indicator { filter:invert(1); }
+
+        .btn-header {
+            padding:0.5rem 1rem; border:none; border-radius:8px;
+            font-family:inherit; font-size:0.85rem; font-weight:500;
+            cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:5px;
+        }
+        .btn-fetch { background:#48bb78; color:#fff; }
+        .btn-fetch:hover { background:#38a169; }
+        .btn-demo { background:rgba(255,255,255,0.2); color:#fff; }
+        .btn-demo:hover { background:rgba(255,255,255,0.3); }
+        .btn-print { background:rgba(255,255,255,0.15); color:#fff; }
+        .btn-print:hover { background:rgba(255,255,255,0.25); }
+        .btn-csv { background:var(--warning); color:#fff; }
+        .btn-csv:hover { background:#b7791f; }
+
+        .container { max-width:1200px; margin:0 auto; padding:1.5rem; }
+
+        /* 설정 패널 */
+        .settings-panel {
+            background: var(--card); border-radius:14px; box-shadow:var(--shadow);
+            padding:1.2rem 1.5rem; margin-bottom:1.5rem;
+            display:flex; gap:1.5rem; align-items:center; flex-wrap:wrap;
+        }
+        .setting-item { display:flex; align-items:center; gap:0.5rem; }
+        .setting-item label { font-size:0.85rem; color:var(--text-sub); font-weight:500; }
+        .setting-item input {
+            width:120px; padding:0.4rem 0.6rem;
+            border:1.5px solid var(--border); border-radius:8px;
+            font-family:inherit; font-size:0.9rem; text-align:right;
+        }
+        .setting-item input:focus { outline:none; border-color:var(--accent); }
+
+        /* 요약 카드 */
+        .summary-cards {
+            display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));
+            gap:1rem; margin-bottom:1.5rem;
+        }
+        .summary-card {
+            background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+            padding:1.2rem; text-align:center;
+        }
+        .summary-card .label { font-size:0.8rem; color:var(--text-sub); margin-bottom:0.3rem; }
+        .summary-card .value { font-size:1.6rem; font-weight:700; color:var(--primary); }
+        .summary-card .sub { font-size:0.75rem; color:var(--text-sub); margin-top:0.2rem; }
+        .summary-card.highlight { background:linear-gradient(135deg, var(--primary), var(--primary-light)); }
+        .summary-card.highlight .label { color:rgba(255,255,255,0.7); }
+        .summary-card.highlight .value { color:#fff; }
+        .summary-card.highlight .sub { color:rgba(255,255,255,0.6); }
+
+        /* 테이블 */
+        .table-card {
+            background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+            overflow:hidden; margin-bottom:1.5rem;
+        }
+        .table-card .title-bar {
+            background:var(--primary); color:#fff;
+            padding:1rem 1.5rem; font-weight:600; font-size:1rem;
+        }
+        table { width:100%; border-collapse:collapse; }
+        thead { background:#edf2f7; }
+        th {
+            padding:0.75rem 1rem; text-align:center;
+            font-size:0.82rem; font-weight:600; color:var(--text-sub);
+            border-bottom:2px solid var(--border);
+        }
+        td {
+            padding:0.7rem 1rem; text-align:center;
+            font-size:0.9rem; border-bottom:1px solid var(--border);
+        }
+        tr:hover { background:#f7fafc; }
+        .text-right { text-align:right; }
+        .text-left { text-align:left; }
+        .font-bold { font-weight:600; }
+        .text-primary { color:var(--primary); }
+        .text-danger { color:var(--danger); }
+        .text-success { color:var(--success); }
+
+        .total-row { background:#edf2f7; font-weight:700; }
+        .total-row td { border-top:2px solid var(--primary); }
+
+        /* 상세 토글 */
+        .detail-btn {
+            padding:3px 10px; border:1px solid var(--border); border-radius:6px;
+            background:#fff; font-size:0.78rem; cursor:pointer; color:var(--accent);
+        }
+        .detail-btn:hover { background:var(--accent); color:#fff; }
+        .detail-row { display:none; }
+        .detail-row.show { display:table-row; }
+        .detail-row td {
+            padding:0.5rem 1rem; background:#f8fafc;
+            text-align:left; font-size:0.82rem;
+        }
+        .detail-table { width:100%; font-size:0.8rem; }
+        .detail-table th { padding:0.4rem 0.6rem; background:#edf2f7; font-size:0.78rem; }
+        .detail-table td { padding:0.4rem 0.6rem; font-size:0.8rem; }
+
+        /* 수동 입력 */
+        .manual-section {
+            background:var(--card); border-radius:14px; box-shadow:var(--shadow);
+            padding:1.5rem; margin-bottom:1.5rem;
+        }
+        .manual-section h3 {
+            font-size:1rem; font-weight:600; margin-bottom:1rem;
+            color:var(--primary); display:flex; align-items:center; gap:8px;
+        }
+        .manual-form { display:flex; gap:0.5rem; flex-wrap:wrap; align-items:flex-end; }
+        .manual-form .form-group { }
+        .manual-form label { display:block; font-size:0.78rem; color:var(--text-sub); margin-bottom:0.2rem; }
+        .manual-form input {
+            padding:0.45rem 0.6rem; border:1.5px solid var(--border);
+            border-radius:8px; font-family:inherit; font-size:0.88rem;
+        }
+        .manual-form input:focus { outline:none; border-color:var(--accent); }
+        .btn-add {
+            padding:0.45rem 1rem; border:none; border-radius:8px;
+            background:var(--accent); color:#fff; font-family:inherit;
+            font-size:0.88rem; font-weight:500; cursor:pointer;
+        }
+        .btn-add:hover { background:var(--accent-dark); }
+
+        /* 상태 메시지 */
+        .status-msg {
+            text-align:center; padding:3rem; color:var(--text-sub);
+            font-size:0.95rem;
+        }
+
+        @media print {
+            .header { position:static; }
+            .btn-header, .settings-panel, .manual-section, .detail-btn { display:none!important; }
+            .container { padding:0; }
+            body { background:#fff; }
+            .table-card, .summary-card { box-shadow:none; border:1px solid #ddd; }
+        }
+        @media(max-width:768px) {
+            .header-content { flex-direction:column; text-align:center; }
+            .summary-cards { grid-template-columns:repeat(2,1fr); }
+        }
+    </style>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1a2744">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="./icon-192.png">
+</head>
+<body>
+
+<!-- ★★★ 웹 앱 URL 이미 삽입됨 ★★★ -->
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjs6cYU-owgq2g6quaeQvERK60jeP-pWG_IMHozvgfq5tSO83BQiur3KH9dcu5C3IN/exec';
+</script>
+
+<div class="header">
+    <div class="header-content">
+        <h1>💰 시대학원 조교 급여관리</h1>
+        <div class="header-controls">
+            <div class="month-sel">
+                <span>📅</span>
+                <input type="month" id="selMonth">
+            </div>
+            <button class="btn-header btn-fetch" onclick="fetchFromSheet()">📊 시트에서 불러오기</button>
+            <button class="btn-header btn-demo" onclick="loadDemo()">🎓 데모</button>
+            <button class="btn-header btn-csv" onclick="exportCSV()">📥 CSV</button>
+            <button class="btn-header btn-print" onclick="window.print()">🖨️ 인쇄</button>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- 설정 -->
+    <div class="settings-panel">
+        <div class="setting-item">
+            <label>💵 시급</label>
+            <input type="number" id="hourlyRate" value="12000" onchange="recalculate()">
+            <span style="font-size:0.85rem;color:var(--text-sub)">원</span>
+        </div>
+        <div class="setting-item">
+            <label>📊 세율</label>
+            <input type="number" id="taxRate" value="3.3" step="0.1" onchange="recalculate()">
+            <span style="font-size:0.85rem;color:var(--text-sub)">%</span>
+        </div>
+    </div>
+
+    <!-- 요약 -->
+    <div class="summary-cards">
+        <div class="summary-card">
+            <div class="label">👥 조교 수</div>
+            <div class="value" id="sumCount">0</div>
+            <div class="sub">명</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">⏱️ 총 근무시간</div>
+            <div class="value" id="sumHours">0</div>
+            <div class="sub">시간</div>
+        </div>
+        <div class="summary-card">
+            <div class="label">💰 세전 합계</div>
+            <div class="value" id="sumPreTax">0</div>
+            <div class="sub">원</div>
+        </div>
+        <div class="summary-card highlight">
+            <div class="label">💸 실지급 합계</div>
+            <div class="value" id="sumNetPay">0</div>
+            <div class="sub">원</div>
+        </div>
+    </div>
+
+    <!-- 급여 테이블 -->
+    <div class="table-card">
+        <div class="title-bar" id="tableTitle">📋 조교 급여 내역</div>
+        <div id="tableContainer">
+            <div class="status-msg" id="emptyMsg">
+                📊 <strong>시트에서 불러오기</strong> 또는 <strong>데모</strong> 버튼을 클릭하세요.<br>
+                아래에서 수동 입력도 가능합니다.
+            </div>
+        </div>
+    </div>
+
+    <!-- 수동 입력 -->
+    <div class="manual-section">
+        <h3>✏️ 수동 입력</h3>
+        <div class="manual-form">
+            <div class="form-group">
+                <label>이름</label>
+                <input type="text" id="manName" placeholder="홍길동" style="width:100px">
+            </div>
+            <div class="form-group">
+                <label>근무일수</label>
+                <input type="number" id="manDays" value="0" min="0" style="width:70px">
+            </div>
+            <div class="form-group">
+                <label>총 근무시간(분)</label>
+                <input type="number" id="manMinutes" value="0" min="0" style="width:100px">
+            </div>
+            <button class="btn-add" onclick="addManual()">➕ 추가</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 데이터 저장소
+    let payrollData = [];
+
+    // 초기화
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const mm = String(now.getMonth()+1).padStart(2,'0');
+        document.getElementById('selMonth').value = now.getFullYear() + '-' + mm;
+    });
+
+    // 시트에서 불러오기
+    async function fetchFromSheet() {
+        if (!APPS_SCRIPT_URL) {
+            alert('⚠️ Apps Script URL이 설정되지 않았습니다.');
+            return;
+        }
+
+        const month = document.getElementById('selMonth').value;
+        if (!month) { alert('월을 선택하세요'); return; }
+
+        document.getElementById('emptyMsg') && (document.getElementById('emptyMsg').innerHTML = '📤 불러오는 중...');
+
+        try {
+            const url = APPS_SCRIPT_URL + '?action=salary&month=' + month;
+            const res = await fetch(url);
+            const json = await res.json();
+
+            if (json.status === 'success' && json.data && json.data.length > 0) {
+                payrollData = json.data.map(d => ({
+                    name: d.name,
+                    workDays: d.workDays,
+                    totalMinutes: d.totalMinutes,
+                    records: (d.details || d.records || []).map(r => ({
+                        date: r.date || '',
+                        dayOfWeek: r.dayOfWeek || '',
+                        workStart: r.workStart || '',
+                        workEnd: r.workEnd || '',
+                        minutes: r.minutes || 0,
+                        content: r.content || ''
+                    }))
+                }));
+                renderTable();
+            } else {
+                document.getElementById('tableContainer').innerHTML =
+                    '<div class="status-msg">⚠️ ' + month + ' 데이터가 없습니다.</div>';
+            }
+        } catch (err) {
+            document.getElementById('tableContainer').innerHTML =
+                '<div class="status-msg">❌ 불러오기 실패: ' + err.message + '</div>';
+        }
+    }
+
+    // 데모 데이터
+    function loadDemo() {
+        payrollData = [
+            { name: '김민수', workDays: 12, totalMinutes: 2880, records: genDemoRecords('김민수', 12) },
+            { name: '이지은', workDays: 10, totalMinutes: 2100, records: genDemoRecords('이지은', 10) },
+            { name: '박서준', workDays: 8, totalMinutes: 1440, records: genDemoRecords('박서준', 8) },
+            { name: '최유리', workDays: 15, totalMinutes: 3600, records: genDemoRecords('최유리', 15) },
+        ];
+        renderTable();
+    }
+
+    function genDemoRecords(name, days) {
+        const records = [];
+        for (let i=1; i<=days; i++) {
+            records.push({
+                date: '2026-03-' + String(i).padStart(2,'0'),
+                dayOfWeek: ['월','화','수','목','금','토'][i%6]+'요일',
+                workStart: '14:00',
+                workEnd: '18:00',
+                minutes: Math.floor(180 + Math.random()*120),
+                content: '보충수업 보조, 채점, 교재정리'
+            });
+        }
+        return records;
+    }
+
+    // 수동 입력 추가
+    function addManual() {
+        const name = document.getElementById('manName').value.trim();
+        const days = parseInt(document.getElementById('manDays').value) || 0;
+        const mins = parseInt(document.getElementById('manMinutes').value) || 0;
+        if (!name) { alert('이름을 입력하세요'); return; }
+
+        payrollData.push({ name, workDays: days, totalMinutes: mins, records: [] });
+        renderTable();
+
+        document.getElementById('manName').value = '';
+        document.getElementById('manDays').value = '0';
+        document.getElementById('manMinutes').value = '0';
+    }
+
+    // 테이블 렌더링
+    function renderTable() {
+        const rate = parseInt(document.getElementById('hourlyRate').value) || 12000;
+        const taxPct = parseFloat(document.getElementById('taxRate').value) || 3.3;
+        const taxRate = taxPct / 100;
+
+        let totalMinutes = 0, totalPreTax = 0, totalTax = 0, totalNet = 0;
+
+        let html = '<table><thead><tr>';
+        html += '<th>No</th><th>조교이름</th><th>근무일수</th><th>총 시간</th>';
+        html += '<th>세전급여</th><th>원천징수<br>('+taxPct+'%)</th><th>실지급액</th><th>상세</th>';
+        html += '</tr></thead><tbody>';
+
+        payrollData.forEach((d, i) => {
+            const hours = d.totalMinutes / 60;
+            const hoursStr = Math.floor(hours) + 'h ' + (d.totalMinutes % 60) + 'm';
+            const preTax = Math.round(hours * rate);
+            const tax = Math.round(preTax * taxRate);
+            const net = preTax - tax;
+
+            totalMinutes += d.totalMinutes;
+            totalPreTax += preTax;
+            totalTax += tax;
+            totalNet += net;
+
+            html += `<tr>
+                <td>${i+1}</td>
+                <td class="font-bold text-left">${d.name}</td>
+                <td>${d.workDays}일</td>
+                <td>${hoursStr}</td>
+                <td class="text-right">${preTax.toLocaleString()}</td>
+                <td class="text-right text-danger">${tax.toLocaleString()}</td>
+                <td class="text-right font-bold text-primary">${net.toLocaleString()}</td>
+                <td>
+                    <button class="detail-btn" onclick="toggleDetail(${i})">▼</button>
+                    <button class="detail-btn" onclick="removeRow(${i})" style="color:var(--danger);border-color:#fed7d7;">✕</button>
+                </td>
+            </tr>`;
+
+            // 상세 행
+            html += `<tr class="detail-row" id="detail-${i}"><td colspan="8">`;
+            if (d.records && d.records.length > 0) {
+                html += '<table class="detail-table"><thead><tr><th>날짜</th><th>요일</th><th>시작</th><th>종료</th><th>시간(분)</th><th>업무내용</th></tr></thead><tbody>';
+                d.records.forEach(r => {
+                    html += `<tr><td>${r.date}</td><td>${r.dayOfWeek||''}</td><td>${r.workStart||''}</td><td>${r.workEnd||''}</td><td>${r.minutes||0}</td><td class="text-left">${r.content||''}</td></tr>`;
+                });
+                html += '</tbody></table>';
+            } else {
+                html += '<div style="padding:0.5rem;color:#999;">상세 근무 기록이 없습니다.</div>';
+            }
+            html += '</td></tr>';
+        });
+
+        // 합계
+        const totalHoursStr = Math.floor(totalMinutes/60) + 'h ' + (totalMinutes%60) + 'm';
+        html += `<tr class="total-row">
+            <td colspan="2" class="font-bold">합  계</td>
+            <td>${payrollData.reduce((s,d)=>s+d.workDays,0)}일</td>
+            <td>${totalHoursStr}</td>
+            <td class="text-right">${totalPreTax.toLocaleString()}</td>
+            <td class="text-right text-danger">${totalTax.toLocaleString()}</td>
+            <td class="text-right font-bold text-primary">${totalNet.toLocaleString()}</td>
+            <td></td>
+        </tr>`;
+
+        html += '</tbody></table>';
+        document.getElementById('tableContainer').innerHTML = html;
+
+        // 요약 업데이트
+        document.getElementById('sumCount').textContent = payrollData.length;
+        document.getElementById('sumHours').textContent = (totalMinutes / 60).toFixed(1);
+        document.getElementById('sumPreTax').textContent = totalPreTax.toLocaleString();
+        document.getElementById('sumNetPay').textContent = totalNet.toLocaleString();
+
+        // 제목 업데이트
+        const month = document.getElementById('selMonth').value;
+        if (month) {
+            const [y, m] = month.split('-');
+            document.getElementById('tableTitle').textContent = `📋 ${y}년 ${parseInt(m)}월 조교 급여 내역`;
+        }
+    }
+
+    function toggleDetail(idx) {
+        const row = document.getElementById('detail-' + idx);
+        row.classList.toggle('show');
+    }
+
+    function removeRow(idx) {
+        if (confirm(payrollData[idx].name + ' 조교를 삭제하시겠습니까?')) {
+            payrollData.splice(idx, 1);
+            renderTable();
+        }
+    }
+
+    function recalculate() {
+        if (payrollData.length > 0) renderTable();
+    }
+
+    // CSV 내보내기
+    function exportCSV() {
+        if (payrollData.length === 0) { alert('데이터가 없습니다'); return; }
+
+        const rate = parseInt(document.getElementById('hourlyRate').value) || 12000;
+        const taxRate = (parseFloat(document.getElementById('taxRate').value) || 3.3) / 100;
+
+        let csv = '\uFEFF이름,근무일수,총근무시간(분),총근무시간,세전급여,원천징수,실지급액\n';
+        payrollData.forEach(d => {
+            const hours = d.totalMinutes / 60;
+            const preTax = Math.round(hours * rate);
+            const tax = Math.round(preTax * taxRate);
+            csv += `${d.name},${d.workDays},${d.totalMinutes},${hours.toFixed(1)},${preTax},${tax},${preTax-tax}\n`;
+        });
+
+        const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `시대학원_조교급여_${document.getElementById('selMonth').value}.csv`;
+        link.click();
+    }
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>시대학원 조교일지 작성기 v2.0</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  --navy: #1a2744;
+  --navy-light: #2a3d62;
+  --blue: #3b6cb5;
+  --blue-light: #5a8fd4;
+  --sky: #e8f0fc;
+  --sky2: #f0f5ff;
+  --accent: #e85d3a;
+  --accent-light: #ff7b5c;
+  --green: #2ba84a;
+  --green-bg: #e8f8ed;
+  --yellow: #f5a623;
+  --yellow-bg: #fef8e8;
+  --red: #d63031;
+  --red-bg: #fdeaea;
+  --gray1: #f7f8fa;
+  --gray2: #edf0f5;
+  --gray3: #d1d8e4;
+  --gray4: #8895a7;
+  --gray5: #5a6577;
+  --dark: #1a1f2e;
+  --radius: 10px;
+  --shadow: 0 2px 12px rgba(26,39,68,0.08);
+  --shadow-lg: 0 8px 30px rgba(26,39,68,0.12);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', -apple-system, sans-serif;
+  background: var(--gray1);
+  color: var(--dark);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+/* ─── Header ─── */
+.header {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 60%, var(--blue) 100%);
+  color: white;
+  padding: 16px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(26,39,68,0.25);
+}
+.header-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header h1 { font-size: 17px; font-weight: 800; letter-spacing: -0.5px; }
+.header-sub { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+.header-badge {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* ─── Connection Status ─── */
+.conn-status {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 15px;
+  white-space: nowrap;
+}
+.conn-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.conn-status.connected { background: rgba(43,168,74,0.2); color: #a7f3d0; }
+.conn-status.connected .conn-dot { background: #2ba84a; box-shadow: 0 0 6px #2ba84a; }
+.conn-status.disconnected { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); }
+.conn-status.disconnected .conn-dot { background: #666; }
+.conn-status.error { background: rgba(214,48,49,0.2); color: #fca5a5; }
+.conn-status.error .conn-dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+/* ─── Demo Button ─── */
+.demo-btn {
+  padding: 4px 12px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 15px;
+  color: rgba(255,255,255,0.85);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.demo-btn:hover { background: rgba(255,255,255,0.25); color: white; }
+
+/* ─── Main ─── */
+.main {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 16px 12px 100px;
+}
+
+/* ─── Card ─── */
+.card {
+  background: white;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  overflow: hidden;
+  border: 1px solid var(--gray2);
+}
+.card-head {
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--gray2);
+  background: var(--sky2);
+  color: var(--navy);
+}
+.card-head .icon {
+  width: 24px; height: 24px;
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.card-body { padding: 14px 16px; }
+
+/* ─── Form Elements ─── */
+.form-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
+.form-row.col { flex-direction: column; align-items: stretch; }
+.form-label {
+  font-size: 12px; font-weight: 700; color: var(--gray5);
+  margin-bottom: 4px; display: flex; align-items: center; gap: 4px;
+}
+.form-label .req { color: var(--accent); font-size: 10px; }
+
+input[type="text"], input[type="number"], input[type="date"],
+input[type="time"], input[type="url"], select, textarea {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid var(--gray3); border-radius: 8px;
+  font-family: inherit; font-size: 14px; color: var(--dark);
+  background: white; transition: border-color 0.2s, box-shadow 0.2s; outline: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--blue); box-shadow: 0 0 0 3px rgba(59,108,181,0.1);
+}
+textarea { resize: vertical; min-height: 60px; }
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' stroke='%238895a7' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+/* ─── Student Row ─── */
+.student-list { margin-top: 6px; }
+.student-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 105px auto;
+  gap: 8px; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--gray2);
+  animation: fadeIn 0.2s ease;
+}
+.student-row:last-child { border-bottom: none; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+.student-row input[type="text"] { padding: 7px 10px; font-size: 13px; }
+
+.status-select {
+  font-size: 13px; padding: 7px 26px 7px 8px;
+  font-weight: 700; border-radius: 6px;
+  min-width: 100px; white-space: nowrap;
+}
+.status-select.complete { background-color: var(--green-bg); border-color: var(--green); color: var(--green); }
+.status-select.incomplete { background-color: var(--red-bg); border-color: var(--red); color: var(--red); }
+.status-select.partial { background-color: var(--yellow-bg); border-color: var(--yellow); color: #b37600; }
+.status-select.absent { background-color: #f0f0f0; border-color: #999; color: #666; }
+
+.btn-remove {
+  width: 28px; height: 28px; border: none;
+  background: var(--gray2); color: var(--gray4); border-radius: 6px;
+  cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.btn-remove:hover { background: var(--red-bg); color: var(--red); }
+
+.btn-add {
+  width: 100%; padding: 8px; border: 2px dashed var(--gray3);
+  background: var(--gray1); border-radius: 8px;
+  color: var(--blue); font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all 0.15s; margin-top: 8px;
+}
+.btn-add:hover { border-color: var(--blue); background: var(--sky); }
+
+/* ─── Tardiness ─── */
+.late-row {
+  display: grid; grid-template-columns: 80px 60px 1fr auto;
+  gap: 8px; align-items: center; padding: 6px 0;
+  border-bottom: 1px solid var(--gray2); animation: fadeIn 0.2s ease;
+}
+.late-row:last-child { border-bottom: none; }
+.late-row input[type="text"] { padding: 7px 10px; font-size: 13px; }
+.late-row input[type="number"] { padding: 7px 10px; font-size: 13px; width: 60px; text-align: center; }
+
+/* ─── Class Block ─── */
+.class-block {
+  background: var(--gray1); border: 1.5px solid var(--gray2);
+  border-radius: var(--radius); padding: 14px; margin-bottom: 12px;
+}
+.class-block-head {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+}
+.class-block-num {
+  background: var(--navy); color: white;
+  font-size: 11px; font-weight: 800; padding: 2px 10px; border-radius: 10px;
+}
+.btn-remove-block {
+  font-size: 11px; padding: 4px 10px;
+  border: 1px solid var(--gray3); background: white; border-radius: 6px;
+  cursor: pointer; color: var(--red); font-weight: 600; font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-remove-block:hover { background: var(--red-bg); border-color: var(--red); }
+
+/* ─── Output ─── */
+.output-area {
+  background: #1e2433; color: #e0e6f0; border-radius: var(--radius);
+  padding: 16px; font-size: 13px; line-height: 1.7;
+  white-space: pre-wrap; word-break: break-all;
+  font-family: 'Noto Sans KR', monospace;
+  min-height: 120px; max-height: 400px; overflow-y: auto;
+  border: 2px solid var(--navy-light);
+}
+
+/* ─── Buttons ─── */
+.btn-group { display: flex; gap: 8px; margin-top: 12px; }
+.btn {
+  flex: 1; padding: 12px; border: none; border-radius: 8px;
+  font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: all 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--blue) 0%, var(--navy) 100%);
+  color: white; box-shadow: 0 4px 15px rgba(59,108,181,0.3);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(59,108,181,0.4); }
+.btn-copy {
+  background: linear-gradient(135deg, #ffe812 0%, #f5c800 100%);
+  color: #3c1e1e; box-shadow: 0 4px 15px rgba(245,200,0,0.3);
+}
+.btn-copy:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(245,200,0,0.4); }
+.btn-submit {
+  background: linear-gradient(135deg, var(--green) 0%, #1e8449 100%);
+  color: white; box-shadow: 0 4px 15px rgba(43,168,74,0.3);
+}
+.btn-submit:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(43,168,74,0.4); }
+.btn-secondary { background: var(--gray2); color: var(--gray5); }
+.btn-secondary:hover { background: var(--gray3); }
+.btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+/* ─── Toast ─── */
+.toast {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--navy); color: white;
+  padding: 12px 24px; border-radius: 25px;
+  font-size: 14px; font-weight: 700;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  z-index: 1000; opacity: 0; transition: all 0.3s ease; pointer-events: none;
+  text-align: center; max-width: 90%;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex; gap: 3px; margin-bottom: 14px;
+  background: white; padding: 4px; border-radius: var(--radius);
+  box-shadow: var(--shadow); border: 1px solid var(--gray2);
+}
+.tab {
+  flex: 1; padding: 10px 6px; border: none; background: transparent;
+  font-size: 12px; font-weight: 700; color: var(--gray4);
+  cursor: pointer; border-radius: 7px; font-family: inherit; transition: all 0.2s;
+  white-space: nowrap;
+}
+.tab.active { background: var(--navy); color: white; box-shadow: 0 2px 8px rgba(26,39,68,0.2); }
+.tab:hover:not(.active) { background: var(--sky); color: var(--navy); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ─── Quick Templates ─── */
+.quick-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.quick-tag {
+  padding: 4px 10px; border: 1px solid var(--gray3);
+  background: white; border-radius: 15px;
+  font-size: 11px; font-weight: 600; color: var(--gray5);
+  cursor: pointer; font-family: inherit; transition: all 0.15s;
+}
+.quick-tag:hover { border-color: var(--blue); color: var(--blue); background: var(--sky); }
+
+/* ─── Footer ─── */
+.footer-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: white; border-top: 1px solid var(--gray2);
+  padding: 10px 12px; box-shadow: 0 -4px 20px rgba(0,0,0,0.06); z-index: 99;
+}
+.footer-inner { max-width: 700px; margin: 0 auto; display: flex; gap: 8px; }
+
+/* ─── Saved History ─── */
+.history-item {
+  padding: 10px 14px; border: 1px solid var(--gray2); border-radius: 8px;
+  margin-bottom: 8px; background: white; cursor: pointer; transition: all 0.15s;
+}
+.history-item:hover { border-color: var(--blue); background: var(--sky2); }
+.history-date { font-size: 13px; font-weight: 700; color: var(--navy); }
+.history-preview { font-size: 11px; color: var(--gray4); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-actions { display: flex; gap: 6px; margin-top: 6px; }
+
+/* ─── Note Box ─── */
+.note-box {
+  background: var(--yellow-bg); border: 1px solid #e8d5a0;
+  border-left: 3px solid var(--yellow); border-radius: 6px;
+  padding: 10px 14px; font-size: 12px; color: #7a6020; line-height: 1.6; margin-bottom: 12px;
+}
+
+/* ─── Manual Accordion ─── */
+.manual-wrap { margin-bottom: 14px; }
+.manual-toggle {
+  width: 100%; padding: 12px 16px;
+  background: linear-gradient(135deg, #f8f4ee 0%, #fff8ef 100%);
+  border: 1.5px solid #e8d9c0; border-radius: var(--radius);
+  cursor: pointer; display: flex; align-items: center; justify-content: space-between;
+  font-family: inherit; font-size: 13px; font-weight: 700; color: #7a5c2e; transition: all 0.2s;
+}
+.manual-toggle:hover { background: #fff3e0; border-color: #d4b882; }
+.manual-toggle .arrow { transition: transform 0.3s; font-size: 12px; }
+.manual-toggle.open .arrow { transform: rotate(180deg); }
+.manual-toggle.open { border-radius: var(--radius) var(--radius) 0 0; }
+.manual-content {
+  max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
+  background: white; border: 1.5px solid #e8d9c0; border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.manual-content.open { max-height: 2000px; }
+.manual-inner { padding: 0 18px; max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease; }
+.manual-content.open .manual-inner { padding: 16px 18px; max-height: 2000px; }
+.manual-inner h3 { font-size: 14px; font-weight: 800; color: var(--navy); margin: 14px 0 8px; display: flex; align-items: center; gap: 6px; }
+.manual-inner h3:first-child { margin-top: 0; }
+.manual-step { display: flex; gap: 10px; margin: 8px 0; align-items: flex-start; }
+.manual-step-num {
+  width: 24px; height: 24px; background: var(--navy); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0; margin-top: 1px;
+}
+.manual-step-text { font-size: 13px; color: var(--gray5); line-height: 1.6; }
+.manual-step-text strong { color: var(--dark); }
+.manual-tip {
+  background: var(--sky2); border: 1px solid var(--gray3); border-radius: 8px;
+  padding: 10px 14px; font-size: 12px; color: var(--gray5); line-height: 1.6; margin: 10px 0;
+}
+.manual-tip strong { color: var(--blue); }
+.manual-example {
+  background: #1e2433; color: #c8d6e5; border-radius: 8px;
+  padding: 12px 14px; font-size: 12px; line-height: 1.7;
+  white-space: pre-wrap; font-family: 'Noto Sans KR', monospace; margin: 8px 0; overflow-x: auto;
+}
+
+/* ─── Settings ─── */
+.setting-row { margin-bottom: 16px; }
+.setting-label { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+.setting-desc { font-size: 11px; color: var(--gray4); margin-bottom: 6px; line-height: 1.5; }
+.url-input-wrap { display: flex; gap: 8px; }
+.url-input-wrap input { flex: 1; }
+.url-input-wrap button { flex-shrink: 0; }
+.setup-guide {
+  background: var(--gray1); border: 1.5px solid var(--gray2);
+  border-radius: var(--radius); padding: 18px; margin-top: 16px;
+}
+.setup-guide h4 { font-size: 14px; font-weight: 800; color: var(--navy); margin-bottom: 12px; }
+.setup-step {
+  display: flex; gap: 12px; margin: 12px 0; align-items: flex-start;
+}
+.setup-step-num {
+  width: 28px; height: 28px; background: var(--blue); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; flex-shrink: 0;
+}
+.setup-step-text { font-size: 13px; color: var(--gray5); line-height: 1.7; flex: 1; }
+.setup-step-text strong { color: var(--dark); }
+.code-block {
+  background: #1e2433; color: #a8d8a8; border-radius: 8px;
+  padding: 14px; font-size: 12px; line-height: 1.6;
+  white-space: pre-wrap; font-family: 'Courier New', monospace;
+  margin: 8px 0; position: relative; overflow-x: auto;
+  border: 1px solid #2a3d62; max-height: 350px; overflow-y: auto;
+}
+.code-copy-btn {
+  position: sticky; top: 0; float: right;
+  padding: 4px 10px; background: var(--blue); color: white;
+  border: none; border-radius: 5px; font-size: 11px; font-weight: 600;
+  cursor: pointer; font-family: inherit; z-index: 1;
+}
+.code-copy-btn:hover { background: var(--blue-light); }
+
+.submit-status {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 14px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  margin-top: 10px; transition: all 0.3s;
+}
+.submit-status.sending { background: #e8f0fc; color: var(--blue); }
+.submit-status.success { background: var(--green-bg); color: var(--green); }
+.submit-status.error { background: var(--red-bg); color: var(--red); }
+.submit-status .spinner {
+  width: 16px; height: 16px; border: 2px solid rgba(59,108,181,0.2);
+  border-top-color: var(--blue); border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Responsive ─── */
+@media (max-width: 480px) {
+  .student-row { grid-template-columns: 66px 1fr 95px 28px; gap: 5px; }
+  .late-row { grid-template-columns: 66px 55px 1fr 28px; gap: 5px; }
+  .form-row { gap: 6px; }
+  .card-body { padding: 12px 12px; }
+  .status-select { font-size: 12px; min-width: 90px; padding: 6px 22px 6px 6px; }
+  .tab { font-size: 11px; padding: 8px 4px; }
+  .conn-status { font-size: 10px; padding: 3px 8px; }
+}
+</style>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1a2744">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="./icon-192.png">
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div>
+      <h1>📋 조교일지 작성기</h1>
+      <div class="header-sub">시대학원 — 입력 → 카톡 복사 + 시트 자동 제출</div>
+    </div>
+    <div class="header-right">
+      <button class="demo-btn" onclick="confirmDemo()" title="데모 데이터 입력">🎓 데모</button>
+      <div class="conn-status disconnected" id="connStatus">
+        <div class="conn-dot"></div>
+        <span id="connText">미연결</span>
+      </div>
+      <div class="header-badge">v2.0</div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('write',this)">✏️ 작성</button>
+    <button class="tab" onclick="switchTab('preview',this)">📄 미리보기</button>
+    <button class="tab" onclick="switchTab('history',this)">📚 저장목록</button>
+    <button class="tab" onclick="switchTab('settings',this)">⚙️ 설정</button>
+  </div>
+
+  <!-- 사용자 매뉴얼 -->
+  <div class="manual-wrap">
+    <button class="manual-toggle" id="manualToggle" onclick="toggleManual()">
+      <span>📖 사용 매뉴얼 — 처음 사용하시나요? 클릭하여 펼쳐보세요</span>
+      <span class="arrow">▼</span>
+    </button>
+    <div class="manual-content" id="manualContent">
+      <div class="manual-inner">
+        <h3>🎯 이 도구는?</h3>
+        <p style="font-size:13px;color:var(--gray5);line-height:1.7;margin-bottom:8px;">
+          조교일지를 <strong>구조화된 양식</strong>에 빠르게 입력하면, <strong>카카오톡에 바로 복사</strong>할 수 있는 정리된 텍스트가 자동 생성됩니다.<br>
+          동시에 <strong>Google 스프레드시트에 자동 제출</strong>되어, 원장님이 한 화면에서 전체 조교 일지를 날짜별로 조회·관리할 수 있습니다.
+        </p>
+
+        <h3>📝 작성 순서</h3>
+        <div class="manual-step">
+          <div class="manual-step-num">1</div>
+          <div class="manual-step-text"><strong>기본 정보</strong> — 날짜(자동), 조교 이름, 업무 시작/종료 시간 입력. 근무시간은 자동 계산.</div>
+        </div>
+        <div class="manual-step">
+          <div class="manual-step-num">2</div>
+          <div class="manual-step-text"><strong>수업별 업무</strong> — 학년 선택 → 업무유형 → 범위 → 학생별 이름·상태·상세를 입력. 수업이 여러 개면 [+ 수업 추가].</div>
+        </div>
+        <div class="manual-step">
+          <div class="manual-step-num">3</div>
+          <div class="manual-step-text"><strong>학생 지각/출결</strong> — 지각 학생 이름, 분, 사유를 기록.</div>
+        </div>
+        <div class="manual-step">
+          <div class="manual-step-num">4</div>
+          <div class="manual-step-text"><strong>기타 메모</strong> — 특이사항 직접 입력 또는 태그 버튼 클릭.</div>
+        </div>
+        <div class="manual-step">
+          <div class="manual-step-num">5</div>
+          <div class="manual-step-text">하단의 <strong style="color:var(--green);">[📋 카톡 + 시트 제출]</strong> 버튼 클릭 → 카톡에 붙여넣기(Ctrl+V) + 스프레드시트 자동 기록!</div>
+        </div>
+
+        <h3>💡 유용한 팁</h3>
+        <div class="manual-tip">
+          <strong>🎓 데모 버튼</strong> — 상단 오른쪽 [🎓 데모] 버튼을 누르면 예시 데이터가 자동 입력됩니다. 처음 사용할 때 흐름을 익히기 좋습니다!<br>
+          <strong>⚙️ 최초 1회 설정 필요</strong> — [설정] 탭에서 Google 스프레드시트 연결 설정을 해야 시트 제출이 작동합니다. 가이드를 따라 5분이면 완료!<br>
+          <strong>📋 카톡만 복사도 가능</strong> — 시트 연결 전에도 카톡 복사 기능은 정상 작동합니다.<br>
+          <strong>📱 모바일 지원</strong> — 스마트폰에서도 사용 가능합니다.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 작성 탭 ─── -->
+  <div id="tab-write" class="tab-panel active">
+    <div class="card">
+      <div class="card-head">
+        <div class="icon" style="background:#e8f0fc;">📅</div>
+        기본 정보
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div style="flex:1;">
+            <div class="form-label">날짜 <span class="req">*</span></div>
+            <input type="date" id="reportDate">
+          </div>
+          <div style="flex:1;">
+            <div class="form-label">조교 이름 <span class="req">*</span></div>
+            <input type="text" id="assistantName" placeholder="예: 홍길동">
+          </div>
+        </div>
+        <div class="form-row">
+          <div style="flex:1;">
+            <div class="form-label">업무 시작</div>
+            <input type="time" id="workStart">
+          </div>
+          <div style="flex:1;">
+            <div class="form-label">업무 종료</div>
+            <input type="time" id="workEnd">
+          </div>
+          <div style="width:90px;text-align:center;">
+            <div class="form-label">근무시간</div>
+            <div id="totalHours" style="font-size:16px;font-weight:800;color:var(--blue);padding-top:6px;">-</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="icon" style="background:#e8f8ed;">📝</div>
+        수업별 업무 내용
+        <div style="margin-left:auto;">
+          <button class="btn btn-sm btn-primary" onclick="addClassBlock()" style="padding:5px 12px;font-size:11px;">+ 수업 추가</button>
+        </div>
+      </div>
+      <div class="card-body" id="classBlocks"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="icon" style="background:#fef8e8;">⏰</div>
+        학생 지각/출결 사항
+      </div>
+      <div class="card-body">
+        <div id="lateList"></div>
+        <button class="btn-add" onclick="addLateRow()">+ 지각/결석 학생 추가</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="icon" style="background:#f0e8fc;">💬</div>
+        기타 특이사항 / 메모
+      </div>
+      <div class="card-body">
+        <textarea id="extraMemo" placeholder="수업 중 특이사항, 건의사항, 학부모 전달사항 등" rows="3"></textarea>
+        <div class="quick-tags" style="margin-top:8px;">
+          <button class="quick-tag" onclick="appendMemo('특이사항 없음')">특이사항 없음</button>
+          <button class="quick-tag" onclick="appendMemo('학부모 상담 필요')">학부모 상담 필요</button>
+          <button class="quick-tag" onclick="appendMemo('교재 추가 필요')">교재 추가 필요</button>
+          <button class="quick-tag" onclick="appendMemo('학생 태도 주의 필요')">태도 주의</button>
+          <button class="quick-tag" onclick="appendMemo('시험 준비 중')">시험 준비 중</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 미리보기 탭 ─── -->
+  <div id="tab-preview" class="tab-panel">
+    <div class="card">
+      <div class="card-head">
+        <div class="icon" style="background:#ffe812;">💬</div>
+        카카오톡 전송용 텍스트
+      </div>
+      <div class="card-body">
+        <div class="note-box">
+          아래 텍스트가 카카오톡에 복사됩니다. <strong>[카톡 복사]</strong> → 채팅방에 붙여넣기!<br>
+          <strong>[카톡 + 시트 제출]</strong>을 누르면 복사와 동시에 Google 스프레드시트에도 기록됩니다.
+        </div>
+        <div id="outputText" class="output-area">작성 탭에서 내용을 입력하면 여기에 자동으로 표시됩니다.</div>
+        <div id="submitStatusArea"></div>
+        <div class="btn-group">
+          <button class="btn btn-copy" onclick="copyToClipboard()">📋 카톡만 복사</button>
+          <button class="btn btn-submit" onclick="copyAndSubmit()">📤 카톡 + 시트 제출</button>
+        </div>
+        <div class="btn-group" style="margin-top:6px;">
+          <button class="btn btn-secondary" onclick="saveToHistory()">💾 로컬 저장</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 저장목록 탭 ─── -->
+  <div id="tab-history" class="tab-panel">
+    <div class="card">
+      <div class="card-head">
+        <div class="icon" style="background:#e8f0fc;">📚</div>
+        저장된 일지
+      </div>
+      <div class="card-body" id="historyList">
+        <div style="text-align:center;color:var(--gray4);padding:30px;font-size:13px;">저장된 일지가 없습니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── 설정 탭 ─── -->
+  <div id="tab-settings" class="tab-panel">
+    <div class="card">
+      <div class="card-head">
+        <div class="icon" style="background:#ffe0d6;">🔗</div>
+        Google 스프레드시트 연결 설정
+      </div>
+      <div class="card-body">
+        <div class="setting-row">
+          <div class="setting-label">Google Apps Script 웹앱 URL</div>
+          <div class="setting-desc">아래 설정 가이드를 따라 만든 URL을 여기에 붙여넣으세요. 한 번만 설정하면 됩니다.<br>
+            <span style="color:var(--green);font-weight:600;">✅ 현재 기본 URL이 자동 설정되어 있습니다. 변경이 필요한 경우에만 수정하세요.</span></div>
+          <div class="url-input-wrap">
+            <input type="url" id="scriptUrl" placeholder="https://script.google.com/macros/s/..." value="">
+            <button class="btn btn-sm btn-primary" onclick="saveScriptUrl()" style="padding:9px 14px;">💾 저장</button>
+          </div>
+        </div>
+        <div class="setting-row">
+          <div class="url-input-wrap">
+            <button class="btn btn-sm btn-submit" onclick="testConnection()" style="flex:0;padding:9px 16px;white-space:nowrap;">🔌 연결 테스트</button>
+            <button class="btn btn-sm btn-secondary" onclick="clearScriptUrl()" style="flex:0;padding:9px 16px;white-space:nowrap;">🗑️ URL 삭제</button>
+          </div>
+          <div id="testResult" style="margin-top:8px;"></div>
+        </div>
+
+        <!-- 설정 가이드 -->
+        <div class="setup-guide">
+          <h4>📘 설정 가이드 (최초 1회, 약 5분 소요)</h4>
+          <p style="font-size:12px;color:var(--gray4);margin-bottom:12px;">아래 순서대로 따라하시면 됩니다. 원장님(관리자)만 설정하면 되고, 조교들은 이 URL만 입력하면 바로 사용 가능합니다.</p>
+
+          <div class="setup-step">
+            <div class="setup-step-num">1</div>
+            <div class="setup-step-text">
+              <strong>Google 스프레드시트 만들기</strong><br>
+              <a href="https://sheets.google.com" target="_blank" style="color:var(--blue);">sheets.google.com</a> 에서 <strong>새 스프레드시트</strong>를 만들고, 이름을 <strong>"시대학원 조교일지"</strong> 등으로 지정합니다.
+            </div>
+          </div>
+
+          <div class="setup-step">
+            <div class="setup-step-num">2</div>
+            <div class="setup-step-text">
+              <strong>Apps Script 열기</strong><br>
+              스프레드시트 상단 메뉴에서 <strong>[확장 프로그램] → [Apps Script]</strong>를 클릭합니다.
+            </div>
+          </div>
+
+          <div class="setup-step">
+            <div class="setup-step-num">3</div>
+            <div class="setup-step-text">
+              <strong>코드 붙여넣기</strong><br>
+              기존 코드를 모두 지우고, 아래 코드를 <strong>전체 복사</strong>하여 붙여넣습니다.
+            </div>
+          </div>
+
+          <div class="code-block" id="appsScriptCode"><button class="code-copy-btn" onclick="copyAppsScript()">📋 코드 복사</button>// 시대학원 조교일지 + 급여정산 v2.0
+var CONFIG = {
+  HOURLY_RATE: 12000, TAX_RATE: 0.033,
+  JOURNAL_SHEET: '조교일지',
+  SALARY_SHEET_PREFIX: '급여정산_'
+};
+
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = getOrCreateJournalSheet(ss);
+    sheet.appendRow([
+      new Date().toLocaleString('ko-KR'),
+      data.date||'', data.dayOfWeek||'', data.name||'',
+      data.workStart||'', data.workEnd||'',
+      data.totalMinutes||0, data.content||''
+    ]);
+    return jsonResponse({status:'success',message:'제출 완료'});
+  } catch(err) {
+    return jsonResponse({status:'error',message:err.toString()});
+  }
+}
+
+function doGet(e) {
+  try {
+    var action = (e&&e.parameter&&e.parameter.action)||'test';
+    if (action==='test') return jsonResponse({status:'ok',message:'연결 성공!'});
+    if (action==='salary') {
+      var month = e.parameter.month;
+      if (!month) return jsonResponse({status:'error',message:'month 필요'});
+      return jsonResponse({status:'success',data:getSalaryData(month)});
+    }
+    if (action==='list_months') return jsonResponse({status:'success',data:getAvailableMonths()});
+    if (action==='names') return jsonResponse({status:'success',data:getAssistantNames()});
+    return jsonResponse({status:'ok',message:'연결 성공!'});
+  } catch(err) {
+    return jsonResponse({status:'error',message:err.toString()});
+  }
+}
+
+function onOpen() {
+  SpreadsheetApp.getUi().createMenu('📋 조교 관리')
+    .addItem('📊 이번 달 급여정산','generateCurrentMonthSalary')
+    .addItem('📊 지난 달 급여정산','generateLastMonthSalary')
+    .addItem('📊 특정 월 급여정산...','generateCustomMonthSalary')
+    .addToUi();
+}
+
+function generateCurrentMonthSalary() {
+  createSalarySheet(Utilities.formatDate(new Date(),'Asia/Seoul','yyyy-MM'));
+}
+function generateLastMonthSalary() {
+  var d=new Date(); d.setMonth(d.getMonth()-1);
+  createSalarySheet(Utilities.formatDate(d,'Asia/Seoul','yyyy-MM'));
+}
+function generateCustomMonthSalary() {
+  var ui=SpreadsheetApp.getUi();
+  var r=ui.prompt('월 입력','예: 2025-03',ui.ButtonSet.OK_CANCEL);
+  if(r.getSelectedButton()===ui.Button.OK) {
+    var m=r.getResponseText().trim();
+    if(/^\d{4}-\d{2}$/.test(m)) createSalarySheet(m);
+    else ui.alert('형식: 2025-03');
+  }
+}
+
+function createSalarySheet(month) {
+  var ss=SpreadsheetApp.getActiveSpreadsheet();
+  var sd=getSalaryData(month);
+  if(!sd.length){SpreadsheetApp.getUi().alert(month+' 데이터 없음');return;}
+  var sn=CONFIG.SALARY_SHEET_PREFIX+month;
+  var old=ss.getSheetByName(sn); if(old) ss.deleteSheet(old);
+  var sh=ss.insertSheet(sn);
+  sh.getRange('A1').setValue('시대학원 급여정산 '+month).setFontSize(14).setFontWeight('bold');
+  sh.getRange('A2').setValue('시급:'+CONFIG.HOURLY_RATE+'원 | 원천징수:'+(CONFIG.TAX_RATE*100)+'%').setFontSize(9).setFontColor('#999');
+  var hd=['이름','근무일수','근무시간(분)','근무시간','세전급여','원천징수','실지급액','상세'];
+  sh.getRange(4,1,1,8).setValues([hd]).setFontWeight('bold').setBackground('#1a2744').setFontColor('#fff');
+  var row=5,tG=0,tT=0,tN=0;
+  sd.forEach(function(p){
+    var h=Math.floor(p.totalMinutes/60),m=p.totalMinutes%60;
+    var g=Math.round((p.totalMinutes/60)*CONFIG.HOURLY_RATE);
+    var t=Math.round(g*CONFIG.TAX_RATE),n=g-t;
+    tG+=g;tT+=t;tN+=n;
+    var det=p.details.map(function(d){return d.date+'('+d.dayOfWeek+') '+d.workStart+'~'+d.workEnd+' ['+d.minutes+'분]';}).join(' / ');
+    sh.getRange(row,1,1,8).setValues([[p.name,p.workDays,p.totalMinutes,h+'h '+m+'m',g,t,n,det]]);
+    [5,6,7].forEach(function(c){sh.getRange(row,c).setNumberFormat('#,##0');});
+    row++;
+  });
+  sh.getRange(row,1).setValue('합계').setFontWeight('bold');
+  sh.getRange(row,5).setValue(tG).setNumberFormat('#,##0').setFontWeight('bold');
+  sh.getRange(row,6).setValue(tT).setNumberFormat('#,##0').setFontWeight('bold');
+  sh.getRange(row,7).setValue(tN).setNumberFormat('#,##0').setFontWeight('bold');
+  sh.getRange(row,1,1,8).setBackground('#e8eef5');
+  [100,80,100,100,120,120,120,500].forEach(function(w,i){sh.setColumnWidth(i+1,w);});
+  sh.setFrozenRows(4); ss.setActiveSheet(sh);
+  SpreadsheetApp.getUi().alert('✅ '+sn+' 생성 완료!\n실지급 합계: '+tN.toLocaleString()+'원');
+}
+
+function getOrCreateJournalSheet(ss) {
+  var s=ss.getSheetByName(CONFIG.JOURNAL_SHEET);
+  if(!s){s=ss.insertSheet(CONFIG.JOURNAL_SHEET);
+    s.appendRow(['제출시간','날짜','요일','조교이름','업무시작','업무종료','근무시간(분)','일지내용']);
+    s.getRange(1,1,1,8).setFontWeight('bold').setBackground('#1a2744').setFontColor('#fff');
+    s.setFrozenRows(1);s.setColumnWidth(8,600);}
+  return s;
+}
+
+function getSalaryData(month) {
+  var ss=SpreadsheetApp.getActiveSpreadsheet();
+  var s=ss.getSheetByName(CONFIG.JOURNAL_SHEET); if(!s) return [];
+  var data=s.getDataRange().getValues(); if(data.length<=1) return [];
+  var ty=parseInt(month.split('-')[0]),tm=parseInt(month.split('-')[1]);
+  var bp={};
+  for(var i=1;i<data.length;i++){
+    var ds=data[i][1],nm=data[i][3],mn=parseInt(data[i][6])||0;
+    if(!nm||!ds) continue;
+    var d=(ds instanceof Date)?ds:new Date(ds);
+    if(isNaN(d.getTime())) continue;
+    if(d.getFullYear()!==ty||(d.getMonth()+1)!==tm) continue;
+    if(!bp[nm]) bp[nm]={name:nm,totalMinutes:0,workDays:0,details:[]};
+    bp[nm].totalMinutes+=mn; bp[nm].workDays+=1;
+    bp[nm].details.push({date:Utilities.formatDate(d,'Asia/Seoul','MM/dd'),
+      dayOfWeek:data[i][2]||'',workStart:data[i][4]||'',workEnd:data[i][5]||'',minutes:mn});
+  }
+  var r=[]; for(var k in bp) r.push(bp[k]);
+  r.sort(function(a,b){return a.name.localeCompare(b.name);}); return r;
+}
+
+function getAvailableMonths() {
+  var s=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.JOURNAL_SHEET);
+  if(!s) return []; var d=s.getDataRange().getValues(),ms={};
+  for(var i=1;i<d.length;i++){var ds=d[i][1]; if(!ds) continue;
+    var dt=(ds instanceof Date)?ds:new Date(ds);
+    if(!isNaN(dt.getTime())) ms[Utilities.formatDate(dt,'Asia/Seoul','yyyy-MM')]=true;}
+  return Object.keys(ms).sort().reverse();
+}
+
+function getAssistantNames() {
+  var s=SpreadsheetApp.getActiveSpreadsheet().getSheetByName(CONFIG.JOURNAL_SHEET);
+  if(!s) return []; var d=s.getDataRange().getValues(),ns={};
+  for(var i=1;i<d.length;i++) if(d[i][3]) ns[d[i][3]]=true;
+  return Object.keys(ns).sort();
+}
+
+function jsonResponse(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}</div>
+
+          <div class="setup-step">
+            <div class="setup-step-num">4</div>
+            <div class="setup-step-text">
+              <strong>저장 후 배포</strong><br>
+              <strong>Ctrl+S</strong>로 저장 → 오른쪽 상단 <strong>[배포] → [새 배포]</strong> 클릭<br>
+              ① 유형: <strong>웹 앱</strong> 선택<br>
+              ② 실행 주체: <strong>"나"</strong><br>
+              ③ 액세스 권한: <strong>"모든 사용자"</strong><br>
+              ④ <strong>[배포]</strong> 클릭 → 권한 승인(Google 계정으로 로그인)
+            </div>
+          </div>
+
+          <div class="setup-step">
+            <div class="setup-step-num">5</div>
+            <div class="setup-step-text">
+              <strong>URL 복사 → 위에 붙여넣기</strong><br>
+              배포 완료 화면에서 <strong>웹 앱 URL</strong>을 복사하여, 위 입력칸에 붙여넣고 <strong>[💾 저장]</strong>을 누르면 완료!<br>
+              <span style="color:var(--accent);font-weight:600;">※ 조교들에게 이 URL을 공유하여, 각자 설정 탭에 입력하게 하면 모든 조교의 일지가 하나의 시트에 모입니다.</span>
+            </div>
+          </div>
+
+          <div class="manual-tip" style="margin-top:12px;">
+            <strong>💡 권한 승인 시 "안전하지 않은 앱" 경고가 나오면?</strong><br>
+            → [고급] → ["시대학원 조교일지(안전하지 않음)(으)로 이동"] 클릭하면 됩니다. 본인 계정의 스크립트이므로 안전합니다.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 하단 고정 버튼 -->
+<div class="footer-bar">
+  <div class="footer-inner">
+    <button class="btn btn-primary" onclick="generateAndPreview()" style="flex:1.5;">📄 미리보기</button>
+    <button class="btn btn-submit" onclick="generateCopyAndSubmit()" style="flex:2;" id="btnMainSubmit">📋 카톡 + 시트 제출</button>
+    <button class="btn btn-secondary" onclick="resetAll()" style="flex:0.7;">🔄</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── 매뉴얼 토글 ───
+function toggleManual() {
+  const btn = document.getElementById('manualToggle');
+  const content = document.getElementById('manualContent');
+  btn.classList.toggle('open');
+  content.classList.toggle('open');
+  btn.querySelector('span:first-child').textContent = content.classList.contains('open')
+    ? '📖 사용 매뉴얼 — 클릭하여 접기'
+    : '📖 사용 매뉴얼 — 처음 사용하시나요? 클릭하여 펼쳐보세요';
+}
+
+// ─── 상태 ───
+let classBlockCount = 0;
+let lateRowCount = 0;
+let studentId = 0;
+
+// ─── 배포된 Apps Script URL (자동 연결) ───
+const DEFAULT_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxjs6cYU-owgq2g6quaeQvERK60jeP-pWG_IMHozvgfq5tSO83BQiur3KH9dcu5C3IN/exec';
+
+// ─── 초기화 ───
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+  addClassBlock();
+  loadHistory();
+
+  // URL이 저장되어 있지 않으면 기본 URL 자동 설정
+  if (!localStorage.getItem('gscript_url') && DEFAULT_SCRIPT_URL) {
+    localStorage.setItem('gscript_url', DEFAULT_SCRIPT_URL);
+  }
+  loadScriptUrl();
+
+  document.getElementById('workStart').addEventListener('change', calcHours);
+  document.getElementById('workEnd').addEventListener('change', calcHours);
+});
+
+function confirmDemo() {
+  const hasData = document.getElementById('assistantName').value.trim()
+    || document.querySelectorAll('.student-row .student-name').length > 3;
+  if (hasData) {
+    if (!confirm('현재 입력된 내용이 초기화되고 데모 데이터로 채워집니다.\n계속하시겠습니까?')) return;
+  }
+  // 작성 탭으로 전환
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-write').classList.add('active');
+  document.querySelectorAll('.tab')[0].classList.add('active');
+  loadDemoData();
+}
+
+function loadDemoData() {
+  // 기본 정보
+  document.getElementById('reportDate').value = '2025-03-15';
+  document.getElementById('assistantName').value = '김민수';
+  document.getElementById('workStart').value = '13:00';
+  document.getElementById('workEnd').value = '18:30';
+  calcHours();
+
+  // 기존 블록 제거
+  document.getElementById('classBlocks').innerHTML = '';
+  document.getElementById('lateList').innerHTML = '';
+  document.getElementById('extraMemo').value = '';
+  document.getElementById('submitStatusArea').innerHTML = '';
+  classBlockCount = 0;
+  studentId = 0;
+  lateRowCount = 0;
+
+  // ═══ 수업 1: 고2 숙제검사 + 소단원 평가 ═══
+  addClassBlock();
+  document.getElementById('grade-1').value = '고2';
+  document.getElementById('task-1').value = '숙제검사';
+  document.getElementById('range-1').value = '지수함수와 로그함수 - 57p까지 / 로그 소단원 평가';
+
+  // 기본 3명 지우고 새로 입력
+  document.getElementById('students-1').innerHTML = '';
+
+  const class1Students = [
+    { name: '박수혁', status: '완료', detail: '' },
+    { name: '이채윤', status: '미완료', detail: '교재 미완료(로그, 지수함수와 로그함수), 소단원 평가 미완료(안 풂)' },
+    { name: '김현지', status: '미완료', detail: '교재 미완료(지수, 로그, 지수함수와 로그함수), 소단원 평가 미완료(안 풂)' },
+    { name: '신명건', status: '일부완료', detail: '교재 미완료(지수, 로그, 지수함수와 로그함수), 소단원 평가 고치기 빼고 완료' },
+  ];
+  class1Students.forEach(s => {
+    addStudent(1);
+    const rows = document.querySelectorAll('#students-1 .student-row');
+    const lastRow = rows[rows.length - 1];
+    lastRow.querySelector('.student-name').value = s.name;
+    lastRow.querySelector('.student-detail').value = s.detail;
+    lastRow.querySelector('.status-select').value = s.status;
+    styleStatus(lastRow.querySelector('.status-select'));
+  });
+
+  // ═══ 수업 2: 고1 숙제검사 ═══
+  addClassBlock();
+  document.getElementById('grade-2').value = '고1';
+  document.getElementById('task-2').value = '숙제검사';
+  document.getElementById('range-2').value = '이차방정식 74~87p 대표문제 + 최다빈출';
+
+  document.getElementById('students-2').innerHTML = '';
+
+  const class2Students = [
+    { name: '심재은', status: '완료', detail: '' },
+    { name: '조승우', status: '완료', detail: '안 푼 문제 있음, 모르고 넘어간 듯(461번)' },
+    { name: '마정우', status: '미완료', detail: '하나도 안 했다고 함(4~5문제 정도 푼 듯)' },
+    { name: '김채윤', status: '일부완료', detail: '~80p, 87p' },
+    { name: '권혁재', status: '일부완료', detail: '~85p까지' },
+  ];
+  class2Students.forEach(s => {
+    addStudent(2);
+    const rows = document.querySelectorAll('#students-2 .student-row');
+    const lastRow = rows[rows.length - 1];
+    lastRow.querySelector('.student-name').value = s.name;
+    lastRow.querySelector('.student-detail').value = s.detail;
+    lastRow.querySelector('.status-select').value = s.status;
+    styleStatus(lastRow.querySelector('.status-select'));
+  });
+
+  // ═══ 지각 기록 ═══
+  const lateStudents = [
+    { name: '신명건', min: '45', reason: '' },
+    { name: '이채윤', min: '55', reason: '치과' },
+    { name: '김채윤', min: '8', reason: '' },
+    { name: '권혁재', min: '19', reason: '' },
+  ];
+  lateStudents.forEach(l => {
+    addLateRow();
+    const rows = document.querySelectorAll('.late-row');
+    const lastRow = rows[rows.length - 1];
+    lastRow.querySelector('.late-name').value = l.name;
+    lastRow.querySelector('.late-min').value = l.min;
+    lastRow.querySelector('.late-reason').value = l.reason;
+  });
+
+  // ═══ 메모 ═══
+  document.getElementById('extraMemo').value = '신명건 학생 지각이 잦음, 학부모 상담 필요할 듯합니다.';
+
+  showToast('📌 데모 데이터 입력 완료!\n하단 [미리보기] 버튼을 눌러보세요');
+}
+
+function calcHours() {
+  const s = document.getElementById('workStart').value;
+  const e = document.getElementById('workEnd').value;
+  const el = document.getElementById('totalHours');
+  if (!s || !e) { el.textContent = '-'; return; }
+  const [sh,sm] = s.split(':').map(Number);
+  const [eh,em] = e.split(':').map(Number);
+  let diff = (eh*60+em) - (sh*60+sm);
+  if (diff < 0) diff += 24*60;
+  const h = Math.floor(diff/60), m = diff%60;
+  el.textContent = m > 0 ? `${h}h ${m}m` : `${h}h`;
+}
+
+function getTotalMinutes() {
+  const s = document.getElementById('workStart').value;
+  const e = document.getElementById('workEnd').value;
+  if (!s || !e) return 0;
+  const [sh,sm] = s.split(':').map(Number);
+  const [eh,em] = e.split(':').map(Number);
+  let diff = (eh*60+em) - (sh*60+sm);
+  if (diff < 0) diff += 24*60;
+  return diff;
+}
+
+// ─── 탭 전환 ───
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'preview') generateOutput();
+}
+
+// ─── 수업 블록 ───
+function addClassBlock() {
+  classBlockCount++;
+  const n = classBlockCount;
+  const div = document.createElement('div');
+  div.className = 'class-block';
+  div.id = `classBlock-${n}`;
+  div.innerHTML = `
+    <div class="class-block-head">
+      <span class="class-block-num">수업 ${n}</span>
+      <button class="btn-remove-block" onclick="removeBlock(${n})">삭제</button>
+    </div>
+    <div class="form-row">
+      <div style="flex:1;">
+        <div class="form-label">학년</div>
+        <select id="grade-${n}">
+          <option value="">선택</option>
+          <option>초3</option><option>초4</option><option>초5</option><option>초6</option>
+          <option>중1</option><option>중2</option><option>중3</option>
+          <option>고1</option><option selected>고2</option><option>고3</option>
+          <option>재수생</option>
+        </select>
+      </div>
+      <div style="flex:2;">
+        <div class="form-label">업무 내용</div>
+        <select id="task-${n}">
+          <option value="숙제검사">숙제검사</option>
+          <option value="소단원 평가">소단원 평가</option>
+          <option value="자습감독">자습감독</option>
+          <option value="질문 응대">질문 응대</option>
+          <option value="채점">채점</option>
+          <option value="기타">기타 (직접입력)</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row col" style="margin-top:6px;">
+      <div class="form-label">범위 / 상세 내용</div>
+      <input type="text" id="range-${n}" placeholder="예: 지수함수와 로그함수 - 57p까지">
+    </div>
+    <div style="margin-top:10px;">
+      <div class="form-label">학생별 결과</div>
+      <div class="student-list" id="students-${n}"></div>
+      <button class="btn-add" onclick="addStudent(${n})">+ 학생 추가</button>
+    </div>
+  `;
+  document.getElementById('classBlocks').appendChild(div);
+  addStudent(n); addStudent(n); addStudent(n);
+}
+
+function removeBlock(n) {
+  const el = document.getElementById(`classBlock-${n}`);
+  if (el) el.remove();
+}
+
+function addStudent(blockN) {
+  studentId++;
+  const sid = studentId;
+  const container = document.getElementById(`students-${blockN}`);
+  const row = document.createElement('div');
+  row.className = 'student-row';
+  row.id = `student-${sid}`;
+  row.innerHTML = `
+    <input type="text" placeholder="이름" class="student-name">
+    <input type="text" placeholder="상세내용 (미완료 범위 등)" class="student-detail">
+    <select class="status-select" onchange="styleStatus(this)">
+      <option value="완료">✅ 완료</option>
+      <option value="미완료">❌ 미완료</option>
+      <option value="일부완료">⚠️ 일부</option>
+      <option value="결석">🚫 결석</option>
+    </select>
+    <button class="btn-remove" onclick="document.getElementById('student-${sid}').remove()">×</button>
+  `;
+  container.appendChild(row);
+  styleStatus(row.querySelector('.status-select'));
+}
+
+function styleStatus(sel) {
+  sel.classList.remove('complete','incomplete','partial','absent');
+  if (sel.value==='완료') sel.classList.add('complete');
+  else if (sel.value==='미완료') sel.classList.add('incomplete');
+  else if (sel.value==='일부완료') sel.classList.add('partial');
+  else if (sel.value==='결석') sel.classList.add('absent');
+}
+
+function addLateRow() {
+  lateRowCount++;
+  const lid = lateRowCount;
+  const container = document.getElementById('lateList');
+  const row = document.createElement('div');
+  row.className = 'late-row';
+  row.id = `late-${lid}`;
+  row.innerHTML = `
+    <input type="text" placeholder="이름" class="late-name">
+    <input type="number" placeholder="분" class="late-min" min="0">
+    <input type="text" placeholder="사유 (선택)" class="late-reason">
+    <button class="btn-remove" onclick="document.getElementById('late-${lid}').remove()">×</button>
+  `;
+  container.appendChild(row);
+}
+
+function appendMemo(text) {
+  const el = document.getElementById('extraMemo');
+  el.value = el.value ? el.value + '\n' + text : text;
+}
+
+// ─── 출력 생성 ───
+function generateOutput() {
+  const date = document.getElementById('reportDate').value;
+  const name = document.getElementById('assistantName').value.trim();
+  const wStart = document.getElementById('workStart').value;
+  const wEnd = document.getElementById('workEnd').value;
+  if (!date) { showToast('⚠️ 날짜를 입력해주세요'); return ''; }
+
+  const d = new Date(date);
+  const days = ['일','월','화','수','목','금','토'];
+  const dateStr = `${d.getFullYear()} ${d.getMonth()+1}/${d.getDate()} (${days[d.getDay()]})`;
+
+  let out = `━━━━━━━━━━━━━━━━━━\n📋 조교일지 | ${dateStr}\n`;
+  if (name) out += `👤 ${name}`;
+  if (wStart && wEnd) {
+    out += `  ⏰ ${wStart}~${wEnd}`;
+    const mins = getTotalMinutes();
+    const h = Math.floor(mins/60), m = mins%60;
+    out += m > 0 ? ` (${h}시간${m}분)` : ` (${h}시간)`;
+  }
+  if (name || (wStart && wEnd)) out += '\n';
+  out += `━━━━━━━━━━━━━━━━━━\n`;
+
+  document.querySelectorAll('.class-block').forEach((block) => {
+    const id = block.id.split('-')[1];
+    const grade = document.getElementById(`grade-${id}`)?.value || '';
+    const task = document.getElementById(`task-${id}`)?.value || '';
+    const range = document.getElementById(`range-${id}`)?.value.trim() || '';
+    out += `\n📚 [${grade}] ${task}`;
+    if (range) out += `\n   📖 ${range}`;
+    out += '\n';
+
+    block.querySelectorAll('.student-row').forEach(row => {
+      const sName = row.querySelector('.student-name')?.value.trim();
+      const sDetail = row.querySelector('.student-detail')?.value.trim();
+      const sStatus = row.querySelector('.status-select')?.value;
+      if (!sName) return;
+      let icon = sStatus==='미완료'?'❌':sStatus==='일부완료'?'⚠️':sStatus==='결석'?'🚫':'✅';
+      out += `   ${icon} ${sName}`;
+      if (sStatus==='완료') out += ' : 완료';
+      else if (sStatus==='결석') { out += ' : 결석'; if(sDetail) out += ` (${sDetail})`; }
+      else { out += ` : ${sStatus}`; if(sDetail) out += ` - ${sDetail}`; }
+      out += '\n';
+    });
+  });
+
+  const lateData = [];
+  document.querySelectorAll('.late-row').forEach(row => {
+    const ln = row.querySelector('.late-name')?.value.trim();
+    const lm = row.querySelector('.late-min')?.value;
+    const lr = row.querySelector('.late-reason')?.value.trim();
+    if (ln) lateData.push({ name:ln, min:lm, reason:lr });
+  });
+  if (lateData.length > 0) {
+    out += '\n⏰ 지각/출결\n';
+    lateData.forEach(l => {
+      out += `   🔸 ${l.name} ${l.min ? l.min+'분 지각':'지각'}`;
+      if (l.reason) out += ` (${l.reason})`;
+      out += '\n';
+    });
+  }
+
+  const memo = document.getElementById('extraMemo').value.trim();
+  if (memo) out += `\n💬 특이사항\n   ${memo.replace(/\n/g,'\n   ')}\n`;
+
+  out += `━━━━━━━━━━━━━━━━━━`;
+  document.getElementById('outputText').textContent = out;
+  return out;
+}
+
+// ─── 미리보기 & 복사 ───
+function generateAndPreview() {
+  const out = generateOutput();
+  if (out) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-preview').classList.add('active');
+    document.querySelectorAll('.tab')[1].classList.add('active');
+  }
+}
+
+function copyToClipboard() {
+  const text = document.getElementById('outputText').textContent;
+  if (!text || text.includes('작성 탭에서')) { showToast('⚠️ 먼저 내용을 작성해주세요'); return; }
+  copyText(text);
+}
+
+function copyText(text) {
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(text)
+      .then(() => showToast('✅ 클립보드에 복사 완료!\n카톡에 붙여넣기 하세요'))
+      .catch(() => fallbackCopy(text));
+  } else { fallbackCopy(text); }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;';
+  document.body.appendChild(ta); ta.select();
+  try { document.execCommand('copy'); showToast('✅ 복사 완료!'); }
+  catch(e) { showToast('⚠️ 복사 실패'); }
+  document.body.removeChild(ta);
+}
+
+// ═══════════════════════════════════════
+// Google Sheets 연동
+// ═══════════════════════════════════════
+function getScriptUrl() {
+  return localStorage.getItem('gscript_url') || DEFAULT_SCRIPT_URL || '';
+}
+
+function loadScriptUrl() {
+  const url = getScriptUrl();
+  document.getElementById('scriptUrl').value = url;
+  if (url) {
+    updateConnectionStatus('saved');
+    // 자동 연결 테스트 실행
+    testConnectionSilent();
+  } else {
+    updateConnectionStatus('none');
+  }
+}
+
+// 조용한 연결 테스트 (초기 로딩 시)
+async function testConnectionSilent() {
+  const url = getScriptUrl();
+  if (!url) return;
+  try {
+    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      updateConnectionStatus('connected');
+    }
+  } catch(e) {
+    // 실패해도 saved 상태 유지
+  }
+}
+
+function saveScriptUrl() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url) { showToast('⚠️ URL을 입력해주세요'); return; }
+  if (!url.startsWith('https://script.google.com/')) {
+    showToast('⚠️ Google Apps Script URL 형식이 아닙니다'); return;
+  }
+  localStorage.setItem('gscript_url', url);
+  updateConnectionStatus('saved');
+  showToast('💾 URL이 저장되었습니다');
+}
+
+function clearScriptUrl() {
+  localStorage.removeItem('gscript_url');
+  document.getElementById('scriptUrl').value = '';
+  updateConnectionStatus('none');
+  document.getElementById('testResult').innerHTML = '';
+  showToast('🗑️ URL이 삭제되었습니다');
+}
+
+function updateConnectionStatus(state) {
+  const el = document.getElementById('connStatus');
+  const txt = document.getElementById('connText');
+  el.className = 'conn-status';
+  if (state === 'connected') {
+    el.classList.add('connected'); txt.textContent = '시트 연결됨';
+  } else if (state === 'saved') {
+    el.classList.add('connected'); txt.textContent = '시트 연결됨';
+  } else if (state === 'error') {
+    el.classList.add('error'); txt.textContent = '연결 오류';
+  } else {
+    el.classList.add('disconnected'); txt.textContent = '미연결';
+  }
+}
+
+async function testConnection() {
+  const url = getScriptUrl();
+  if (!url) { showToast('⚠️ 먼저 URL을 저장해주세요'); return; }
+  const result = document.getElementById('testResult');
+  result.innerHTML = '<div class="submit-status sending"><div class="spinner"></div> 연결 테스트 중...</div>';
+  try {
+    const res = await fetch(url, { method: 'GET', redirect: 'follow' });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      result.innerHTML = '<div class="submit-status success">✅ 연결 성공! 스프레드시트에 정상 연결되었습니다.</div>';
+      updateConnectionStatus('connected');
+    } else {
+      result.innerHTML = '<div class="submit-status error">❌ 응답은 있으나 형식이 다릅니다: ' + JSON.stringify(data) + '</div>';
+      updateConnectionStatus('error');
+    }
+  } catch(err) {
+    result.innerHTML = '<div class="submit-status error">❌ 연결 실패: ' + err.message + '<br>URL을 확인하고, 배포 설정에서 "모든 사용자" 액세스인지 확인해주세요.</div>';
+    updateConnectionStatus('error');
+  }
+}
+
+async function submitToSheet(content) {
+  const url = getScriptUrl();
+  if (!url) return { ok: false, reason: 'no_url' };
+
+  const date = document.getElementById('reportDate').value;
+  const d = new Date(date);
+  const days = ['일','월','화','수','목','금','토'];
+  const payload = {
+    date: date,
+    dayOfWeek: days[d.getDay()],
+    name: document.getElementById('assistantName').value.trim(),
+    workStart: document.getElementById('workStart').value,
+    workEnd: document.getElementById('workEnd').value,
+    totalMinutes: getTotalMinutes(),
+    content: content
+  };
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload),
+      redirect: 'follow'
+    });
+    const data = await res.json();
+    return { ok: data.status === 'success', data };
+  } catch(err) {
+    // no-cors 모드 fallback
+    try {
+      await fetch(url, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(payload)
+      });
+      return { ok: true, data: { message: '제출됨 (확인은 시트에서)' } };
+    } catch(e2) {
+      return { ok: false, reason: 'error', message: e2.message };
+    }
+  }
+}
+
+// 미리보기 탭에서: 복사 + 제출
+async function copyAndSubmit() {
+  const text = document.getElementById('outputText').textContent;
+  if (!text || text.includes('작성 탭에서')) { showToast('⚠️ 먼저 내용을 생성해주세요'); return; }
+  copyText(text);
+  await doSubmit(text);
+}
+
+// 메인 버튼: 생성 + 복사 + 제출
+async function generateCopyAndSubmit() {
+  const out = generateOutput();
+  if (!out) return;
+  copyText(out);
+  await doSubmit(out);
+}
+
+async function doSubmit(content) {
+  const url = getScriptUrl();
+  if (!url) {
+    showToast('📋 카톡 복사 완료!\n(시트 제출: 설정 탭에서 URL을 먼저 등록하세요)');
+    return;
+  }
+  const area = document.getElementById('submitStatusArea');
+  area.innerHTML = '<div class="submit-status sending"><div class="spinner"></div> 스프레드시트에 제출 중...</div>';
+  const result = await submitToSheet(content);
+  if (result.ok) {
+    area.innerHTML = '<div class="submit-status success">✅ 스프레드시트 제출 완료!</div>';
+    showToast('✅ 카톡 복사 + 시트 제출 모두 완료!');
+    setTimeout(() => { area.innerHTML = ''; }, 4000);
+  } else if (result.reason === 'no_url') {
+    area.innerHTML = '';
+    showToast('📋 카톡 복사 완료!\n(시트 미연결 → 설정 탭에서 URL 등록)');
+  } else {
+    area.innerHTML = '<div class="submit-status error">❌ 시트 제출 실패: ' + (result.message||'') + '</div>';
+    showToast('📋 카톡 복사는 완료!\n(시트 제출 오류 → 설정 확인)');
+  }
+}
+
+function copyAppsScript() {
+  const code = document.getElementById('appsScriptCode').textContent.replace('📋 코드 복사', '').trim();
+  copyText(code);
+  showToast('✅ Apps Script 코드가 복사되었습니다!');
+}
+
+// ─── 저장 ───
+function saveToHistory() {
+  const text = document.getElementById('outputText').textContent;
+  if (!text || text.includes('작성 탭에서')) { showToast('⚠️ 먼저 내용을 생성해주세요'); return; }
+  const history = JSON.parse(localStorage.getItem('assistantHistory') || '[]');
+  history.unshift({
+    id: Date.now(),
+    date: document.getElementById('reportDate').value,
+    name: document.getElementById('assistantName').value.trim(),
+    text, savedAt: new Date().toISOString()
+  });
+  if (history.length > 50) history.pop();
+  localStorage.setItem('assistantHistory', JSON.stringify(history));
+  showToast('💾 저장되었습니다');
+  loadHistory();
+}
+
+function loadHistory() {
+  const container = document.getElementById('historyList');
+  const history = JSON.parse(localStorage.getItem('assistantHistory') || '[]');
+  if (!history.length) {
+    container.innerHTML = '<div style="text-align:center;color:var(--gray4);padding:30px;font-size:13px;">저장된 일지가 없습니다.</div>';
+    return;
+  }
+  const days = ['일','월','화','수','목','금','토'];
+  container.innerHTML = history.map(h => {
+    const d = new Date(h.date);
+    const dateStr = `${d.getFullYear()}.${d.getMonth()+1}.${d.getDate()} (${days[d.getDay()]})`;
+    const preview = h.text.substring(0,80).replace(/\n/g,' ');
+    const safeText = h.text.replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$/g,'\\$');
+    return `<div class="history-item">
+      <div class="history-date">${dateStr} ${h.name?'- '+h.name:''}</div>
+      <div class="history-preview">${preview}...</div>
+      <div class="history-actions">
+        <button class="btn btn-sm btn-copy" style="flex:0;padding:4px 10px;font-size:11px;" onclick="event.stopPropagation();copyText(\`${safeText}\`)">📋 복사</button>
+        <button class="btn btn-sm btn-secondary" style="flex:0;padding:4px 10px;font-size:11px;" onclick="event.stopPropagation();deleteHistory(${h.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteHistory(id) {
+  let history = JSON.parse(localStorage.getItem('assistantHistory') || '[]');
+  history = history.filter(h => h.id !== id);
+  localStorage.setItem('assistantHistory', JSON.stringify(history));
+  loadHistory();
+  showToast('🗑️ 삭제되었습니다');
+}
+
+// ─── 초기화 ───
+function resetAll() {
+  if (!confirm('모든 입력 내용을 초기화하시겠습니까?')) return;
+  document.getElementById('assistantName').value = '';
+  document.getElementById('workStart').value = '';
+  document.getElementById('workEnd').value = '';
+  document.getElementById('totalHours').textContent = '-';
+  document.getElementById('extraMemo').value = '';
+  document.getElementById('classBlocks').innerHTML = '';
+  document.getElementById('lateList').innerHTML = '';
+  document.getElementById('outputText').textContent = '작성 탭에서 내용을 입력하면 여기에 자동으로 표시됩니다.';
+  document.getElementById('submitStatusArea').innerHTML = '';
+  classBlockCount = 0; studentId = 0; lateRowCount = 0;
+  document.getElementById('reportDate').value = new Date().toISOString().split('T')[0];
+  addClassBlock();
+  showToast('🔄 초기화되었습니다');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

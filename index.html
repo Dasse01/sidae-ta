@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>시대학원 조교관리</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#1a2744">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="조교관리">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;800&display=swap');
+:root {
+  --navy: #1a2744;
+  --navy-light: #2a3d62;
+  --blue: #4299e1;
+  --green: #38a169;
+  --orange: #ed8936;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: linear-gradient(160deg, var(--navy) 0%, var(--navy-light) 40%, #1e3a5f 100%);
+  min-height: 100vh; color: white;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.logo { font-size: 48px; margin-bottom: 8px; }
+h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+.sub { font-size: 13px; opacity: 0.6; margin-bottom: 36px; }
+.cards { display: flex; flex-direction: column; gap: 16px; width: 100%; max-width: 380px; }
+.card {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px; padding: 24px 22px;
+  text-decoration: none; color: white;
+  transition: all 0.25s; cursor: pointer;
+  display: flex; align-items: center; gap: 16px;
+  backdrop-filter: blur(10px);
+}
+.card:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+.card:active { transform: scale(0.98); }
+.card-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.card-icon.journal { background: linear-gradient(135deg, var(--blue), #2b6cb0); }
+.card-icon.salary { background: linear-gradient(135deg, var(--green), #276749); }
+.card-icon.sheet { background: linear-gradient(135deg, var(--orange), #c05621); }
+.card-text h2 { font-size: 16px; font-weight: 700; margin-bottom: 3px; }
+.card-text p { font-size: 12px; opacity: 0.6; line-height: 1.4; }
+.card-arrow { margin-left: auto; opacity: 0.4; font-size: 18px; }
+
+.install-banner {
+  display: none; margin-top: 30px; padding: 14px 20px;
+  background: rgba(66,153,225,0.15); border: 1px solid rgba(66,153,225,0.3);
+  border-radius: 12px; text-align: center; width: 100%; max-width: 380px;
+}
+.install-banner.show { display: block; }
+.install-banner p { font-size: 13px; opacity: 0.8; margin-bottom: 10px; }
+.install-btn {
+  padding: 10px 24px; border: none; border-radius: 10px;
+  background: var(--blue); color: white; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit; transition: all 0.2s;
+}
+.install-btn:hover { background: #3182ce; }
+
+.footer { margin-top: 40px; font-size: 11px; opacity: 0.3; text-align: center; }
+
+/* iOS 안내 */
+.ios-guide {
+  display: none; margin-top: 20px; padding: 14px 20px;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 12px; width: 100%; max-width: 380px;
+  font-size: 12px; opacity: 0.7; line-height: 1.7; text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div class="logo">📋</div>
+<h1>시대학원 조교관리</h1>
+<div class="sub">조교일지 작성 · 급여관리 · 스프레드시트 연동</div>
+
+<div class="cards">
+  <a class="card" href="./journal.html">
+    <div class="card-icon journal">📝</div>
+    <div class="card-text">
+      <h2>조교일지 작성기</h2>
+      <p>수업별 업무·학생 상태·지각 기록<br>카톡 복사 + 시트 자동 제출</p>
+    </div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <a class="card" href="./salary.html">
+    <div class="card-icon salary">💰</div>
+    <div class="card-text">
+      <h2>급여관리</h2>
+      <p>시트 데이터 불러와 자동 계산<br>시급·세율 설정 · CSV 다운로드</p>
+    </div>
+    <div class="card-arrow">→</div>
+  </a>
+
+  <a class="card" href="https://docs.google.com/spreadsheets/d/YOUR_SHEET_ID" target="_blank" id="sheetLink">
+    <div class="card-icon sheet">📊</div>
+    <div class="card-text">
+      <h2>스프레드시트 열기</h2>
+      <p>조교일지 원본 데이터<br>급여정산 시트 직접 확인</p>
+    </div>
+    <div class="card-arrow">→</div>
+  </a>
+</div>
+
+<!-- PWA 설치 배너 (Android Chrome) -->
+<div class="install-banner" id="installBanner">
+  <p>📲 홈 화면에 추가하면 앱처럼 사용할 수 있습니다!</p>
+  <button class="install-btn" id="installBtn" onclick="installPWA()">홈 화면에 추가</button>
+</div>
+
+<!-- iOS Safari 안내 -->
+<div class="ios-guide" id="iosGuide">
+  📲 <strong>홈 화면에 추가하기</strong><br>
+  하단 공유 버튼 (□↑) → "홈 화면에 추가" 탭하세요
+</div>
+
+<div class="footer">
+  시대학원 AI입시연구소 · MacEduTech<br>
+  v2.0 PWA
+</div>
+
+<script>
+// Service Worker 등록
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js')
+    .then(reg => console.log('SW registered:', reg.scope))
+    .catch(err => console.log('SW registration failed:', err));
+}
+
+// PWA 설치 이벤트 (Android Chrome)
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').classList.add('show');
+});
+
+function installPWA() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(choice => {
+    if (choice.outcome === 'accepted') {
+      document.getElementById('installBanner').style.display = 'none';
+    }
+    deferredPrompt = null;
+  });
+}
+
+// iOS Safari 감지
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const isStandalone = window.navigator.standalone === true;
+if (isIOS && !isStandalone) {
+  document.getElementById('iosGuide').style.display = 'block';
+}
+
+// 설치 완료 후 배너 숨기기
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
+});
+</script>
+</body>
+</html>
