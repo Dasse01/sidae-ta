@@ -144,6 +144,34 @@ const ua = navigator.userAgent;
 const isIOS = /iPad|iPhone|iPod/.test(ua);
 const isAndroid = /Android/.test(ua);
 const isSamsung = /SamsungBrowser/.test(ua);
+const isInApp = /KAKAOTALK|NAVER|Line|Instagram|FB_IAB|FBAN|Twitter|everytimeApp/i.test(ua);
+
+// 인앱브라우저 감지 시 외부 브라우저 열기 안내
+if (isInApp) {
+  const banner = document.getElementById('installBanner');
+  const guide = document.getElementById('installGuide');
+  banner.innerHTML = 
+    '<p style="font-size:14px;font-weight:700;margin-bottom:12px;">⚠️ 카카오톡 브라우저에서는 앱 설치가 안됩니다</p>' +
+    '<p style="font-size:12px;opacity:0.8;margin-bottom:14px;">아래 버튼으로 Chrome/Safari에서 열어주세요!</p>' +
+    '<button onclick="openExternal()" style="padding:12px 28px;border:none;border-radius:10px;background:#4299e1;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;">🌐 외부 브라우저로 열기</button>' +
+    '<div style="margin-top:12px;font-size:11px;opacity:0.6;line-height:1.7;text-align:left;padding:10px 12px;background:rgba(255,255,255,0.06);border-radius:8px;">' +
+    '또는 직접: 우측 상단 <b>⋮</b> → <b>"다른 브라우저로 열기"</b></div>';
+}
+
+// 외부 브라우저로 열기
+function openExternal() {
+  const currentUrl = window.location.href;
+  if (isAndroid) {
+    // Android: intent 스킴으로 Chrome 열기
+    window.location.href = 'intent://' + currentUrl.replace(/https?:\/\//, '') + 
+      '#Intent;scheme=https;package=com.android.chrome;end';
+  } else if (isIOS) {
+    // iOS: Safari로 열기
+    window.location.href = currentUrl;
+  } else {
+    window.open(currentUrl, '_system');
+  }
+}
 
 // PWA 자동 설치 프롬프트 (Android Chrome)
 let deferredPrompt = null;
@@ -207,7 +235,7 @@ function showManualGuide() {
 
 // 1초 후 beforeinstallprompt가 안 뜨면 수동 안내 표시
 setTimeout(() => {
-  if (!deferredPrompt && !isStandalone) {
+  if (!deferredPrompt && !isStandalone && !isInApp) {
     showManualGuide();
   }
 }, 1000);
