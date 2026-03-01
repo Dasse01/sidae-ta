@@ -61,10 +61,10 @@ h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4
 }
 .install-banner p { font-size: 13px; opacity: 0.8; margin-bottom: 10px; }
 .install-btn {
-  padding: 10px 24px; border: none; border-radius: 10px;
-  background: var(--blue); color: white; font-size: 14px; font-weight: 700;
+  padding: 12px 24px; border: none; border-radius: 10px;
+  background: var(--blue); color: white; font-size: 15px; font-weight: 700;
   cursor: pointer; font-family: inherit; transition: all 0.2s;
-  display: none;
+  width: 100%; margin-bottom: 10px;
 }
 .install-btn:hover { background: #3182ce; }
 .install-guide {
@@ -115,7 +115,7 @@ h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4
 <!-- 앱 설치 안내 -->
 <div class="install-banner" id="installBanner">
   <p>📲 홈 화면에 추가하면 앱처럼 사용할 수 있습니다!</p>
-  <button class="install-btn" id="installBtn" onclick="installPWA()">홈 화면에 추가</button>
+  <button class="install-btn" id="installBtn" onclick="handleInstall()">📱 홈 화면에 추가하기</button>
   <div class="install-guide" id="installGuide"></div>
 </div>
 
@@ -127,16 +127,7 @@ h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4
 <script>
 // Service Worker 등록
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
-    .then(reg => console.log('SW registered:', reg.scope))
-    .catch(err => console.log('SW failed:', err));
-}
-
-// 이미 설치된(standalone) 상태면 배너 숨기기
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
-  || window.navigator.standalone === true;
-if (isStandalone) {
-  document.getElementById('installBanner').classList.add('installed-hide');
+  navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
 
 // 기기 감지
@@ -145,45 +136,26 @@ const isIOS = /iPad|iPhone|iPod/.test(ua);
 const isAndroid = /Android/.test(ua);
 const isSamsung = /SamsungBrowser/.test(ua);
 const isInApp = /KAKAOTALK|NAVER|Line|Instagram|FB_IAB|FBAN|Twitter|everytimeApp/i.test(ua);
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-// 인앱브라우저 감지 시 외부 브라우저 열기 안내
-if (isInApp) {
-  const banner = document.getElementById('installBanner');
-  const guide = document.getElementById('installGuide');
-  banner.innerHTML = 
-    '<p style="font-size:14px;font-weight:700;margin-bottom:12px;">⚠️ 카카오톡 브라우저에서는 앱 설치가 안됩니다</p>' +
-    '<p style="font-size:12px;opacity:0.8;margin-bottom:14px;">아래 버튼으로 Chrome/Safari에서 열어주세요!</p>' +
-    '<button onclick="openExternal()" style="padding:12px 28px;border:none;border-radius:10px;background:#4299e1;color:white;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;width:100%;">🌐 외부 브라우저로 열기</button>' +
-    '<div style="margin-top:12px;font-size:11px;opacity:0.6;line-height:1.7;text-align:left;padding:10px 12px;background:rgba(255,255,255,0.06);border-radius:8px;">' +
-    '또는 직접: 우측 상단 <b>⋮</b> → <b>"다른 브라우저로 열기"</b></div>';
+// 이미 설치된 상태면 배너 숨기기
+if (isStandalone) {
+  document.getElementById('installBanner').classList.add('installed-hide');
 }
 
-// 외부 브라우저로 열기
-function openExternal() {
-  const currentUrl = window.location.href;
-  if (isAndroid) {
-    // Android: intent 스킴으로 Chrome 열기
-    window.location.href = 'intent://' + currentUrl.replace(/https?:\/\//, '') + 
-      '#Intent;scheme=https;package=com.android.chrome;end';
-  } else if (isIOS) {
-    // iOS: Safari로 열기
-    window.location.href = currentUrl;
-  } else {
-    window.open(currentUrl, '_system');
-  }
-}
-
-// PWA 자동 설치 프롬프트 (Android Chrome)
+// PWA 자동 설치 프롬프트 저장
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  document.getElementById('installBtn').style.display = 'inline-block';
-  document.getElementById('installGuide').innerHTML = 
-    '👆 위 버튼을 누르면 바로 설치됩니다!';
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
 });
 
-function installPWA() {
+// 메인 설치 버튼 클릭 처리
+function handleInstall() {
+  // 1) 자동 설치 프롬프트가 있으면 바로 실행
   if (deferredPrompt) {
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(choice => {
@@ -192,32 +164,55 @@ function installPWA() {
       }
       deferredPrompt = null;
     });
+    return;
+  }
+  // 2) 없으면 가이드 토글 표시
+  const guide = document.getElementById('installGuide');
+  if (guide.style.display === 'block') {
+    guide.style.display = 'none';
+    return;
+  }
+  guide.style.display = 'block';
+}
+
+// 외부 브라우저로 열기 (인앱브라우저용)
+function openExternal() {
+  const url = window.location.href;
+  if (isAndroid) {
+    window.location.href = 'intent://' + url.replace(/https?:\/\//, '') + 
+      '#Intent;scheme=https;package=com.android.chrome;end';
+  } else {
+    window.open(url, '_system');
   }
 }
 
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').style.display = 'none';
-});
-
-// 기기별 수동 설치 안내 표시
-function showManualGuide() {
+// 기기별 가이드 내용 설정
+function initGuide() {
   const guide = document.getElementById('installGuide');
-  
-  if (isIOS) {
+  const btn = document.getElementById('installBtn');
+  guide.style.display = 'none'; // 초기에는 숨김, 버튼 클릭 시 표시
+
+  if (isInApp) {
+    // 인앱브라우저: 외부 브라우저 안내
+    btn.textContent = '🌐 외부 브라우저로 열기';
+    btn.onclick = openExternal;
+    guide.style.display = 'block';
+    guide.innerHTML = 
+      '⚠️ <b>카카오톡/네이버 브라우저</b>에서는 설치가 안됩니다.<br>' +
+      '위 버튼 또는 우측 상단 <b>⋮</b> → <b>"다른 브라우저로 열기"</b>';
+  } else if (isIOS) {
     guide.innerHTML = 
       '📱 <b>iPhone / iPad 설치 방법</b><br>' +
       '① Safari 하단의 <b>공유 버튼</b> (□↑) 탭<br>' +
       '② 아래로 스크롤 → <b>"홈 화면에 추가"</b> 탭<br>' +
       '③ 우측 상단 <b>"추가"</b> 탭 → 완료!<br><br>' +
-      '⚠️ 반드시 <b>Safari</b>에서 열어야 합니다.<br>' +
-      '(카톡/네이버 등 인앱브라우저에서는 불가)';
+      '⚠️ 반드시 <b>Safari</b>에서 열어야 합니다.';
   } else if (isAndroid && isSamsung) {
     guide.innerHTML = 
       '📱 <b>삼성 인터넷 설치 방법</b><br>' +
       '① 하단 <b>≡ 메뉴</b> 탭<br>' +
-      '② <b>"현재 페이지 추가"</b> → <b>"홈 화면"</b> 선택<br>' +
-      '③ 완료!<br><br>' +
-      '💡 Chrome에서 열면 자동 설치 팝업이 뜹니다.';
+      '② <b>"현재 페이지 추가"</b> → <b>"홈 화면"</b> 선택<br><br>' +
+      '💡 <b>Chrome</b>에서 열면 더 쉽게 설치됩니다!';
   } else if (isAndroid) {
     guide.innerHTML = 
       '📱 <b>Android Chrome 설치 방법</b><br>' +
@@ -226,19 +221,13 @@ function showManualGuide() {
       '③ 완료!';
   } else {
     guide.innerHTML = 
-      '💻 <b>PC 설치 방법</b><br>' +
-      '① Chrome 주소창 오른쪽의 <b>설치 아이콘</b> (⊕) 클릭<br>' +
-      '② 또는 주소창 오른쪽 <b>⋮</b> → <b>"앱 설치"</b><br>' +
-      '③ 바탕화면에 앱 바로가기가 생성됩니다!';
+      '💻 <b>PC Chrome 설치</b><br>' +
+      '① 주소창 오른쪽 <b>설치 아이콘</b> (⊕) 클릭<br>' +
+      '② 또는 <b>⋮</b> → <b>"앱 설치"</b>';
   }
 }
 
-// 1초 후 beforeinstallprompt가 안 뜨면 수동 안내 표시
-setTimeout(() => {
-  if (!deferredPrompt && !isStandalone && !isInApp) {
-    showManualGuide();
-  }
-}, 1000);
+initGuide();
 </script>
 </body>
 </html>
